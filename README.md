@@ -4,12 +4,6 @@ Second commit in master branch
 
 Third commit for not related feature
 
-This is feature branch
+New cmt after revert merge
 
-Implement 01
-
-Implement 02
-
-Implement 03
-
-New commit after revert merge feature
+After this line will be the feature are merge again
