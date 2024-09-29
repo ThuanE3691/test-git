@@ -1,0 +1,125 @@
+h1,
+h2,
+p {
+	margin: 0;
+}
+body {
+	background: #dddddd;
+	margin: 24px;
+}
+.container {
+	display: flex;
+	justify-content: center;
+	gap: 80px;
+}
+.time-score {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+.timer {
+	font-family: sans-serif;
+	display: flex;
+	padding: 24px 32px;
+	border-radius: 20px;
+	background: white;
+	gap: 2px;
+	align-items: center;
+	height: 50px;
+}
+.score {
+	font-family: sans-serif;
+	padding: 20px;
+	border-radius: 20px;
+	background: white;
+	/* align-items: center; */
+	height: 70px;
+}
+.my-score {
+	text-align: center;
+	font-size: 45px;
+	color: #007bc0;
+	/* font-weight: bold; */
+	margin-top: 10px;
+}
+.timer__part {
+	font-size: 36px;
+	font-weight: bold;
+}
+
+.timer__btn {
+	width: 50px;
+	height: 50px;
+	margin-left: 16px;
+	border-radius: 50%;
+	border: none;
+	color: white;
+	background: #8208e6;
+	cursor: pointer;
+}
+
+.timer__btn--start {
+	background: #00b84c;
+}
+
+.timer__btn--stop {
+	background: #ff0256;
+}
+.questionnaires {
+	background: white;
+	padding: 20px;
+	border-radius: 20px;
+	width: 50%;
+	display: none;
+}
+
+.answer {
+	margin-top: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	font-size: 20px;
+}
+
+.option {
+	cursor: pointer;
+	width: 24px;
+	height: 24px;
+	border: 1px solid black;
+}
+.tick {
+	border-radius: 50%;
+}
+.multi {
+	display: flex;
+}
+.check {
+	display: none;
+}
+.answer.text {
+	display: none;
+}
+
+.answer.text.active {
+	display: flex;
+}
+
+.answer.text > input {
+	width: 70%;
+	height: 20px;
+	display: block; /* Ensure the input is visible */
+	margin-bottom: 10px;
+}
+
+.result {
+	width: 50%;
+	padding: 20px;
+	background: white;
+	border-radius: 20px;
+}
+.fail-dialog {
+	display: none;
+}
+.result.hidden {
+	display: none;
+}

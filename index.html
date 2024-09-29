@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link
+			href="https://fonts.googleapis.com/icon?family=Material+Icons"
+			rel="stylesheet"
+		/>
+		<title>Time Questionnaires</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="time-score">
+				<div class="timer"></div>
+				<div class="score">
+					<p>Your score</p>
+					<p class="my-score">0</p>
+				</div>
+			</div>
+			<div class="questionnaires">
+				<h1 class="question">Q1: What is the capital of France?</h1>
+				<div class="answer multi">
+					<div class="option-container">
+						<input type="radio" name="checkbox" id="option1" />
+						<label for="html">Paris</label>
+					</div>
+					<div class="option-container">
+						<input type="radio" name="checkbox" id="option1" />
+						<label for="html">Madrid</label>
+					</div>
+					<div class="option-container">
+						<input type="radio" name="checkbox" id="option1" />
+						<label for="html">Rome</label>
+					</div>
+					<div class="option-container">
+						<input type="radio" name="checkbox" id="option1" />
+						<label for="html">Berlin</label>
+					</div>
+				</div>
+				<div class="answer check">
+					<div class="option-container">
+						<input type="checkbox" name="checkbox" id="option1" />
+						<label for="html">Green</label>
+					</div>
+					<div class="option-container">
+						<input type="checkbox" name="checkbox" id="option1" />
+						<label for="html">Blue</label>
+					</div>
+					<div class="option-container">
+						<input type="checkbox" name="checkbox" id="option1" />
+						<label for="html">Red</label>
+					</div>
+					<div class="option-container">
+						<input type="checkbox" name="checkbox" id="option1" />
+						<label for="html">Yellow</label>
+					</div>
+				</div>
+				<div class="answer text">
+					<input type="text" placeholder="Type your answer here" />
+				</div>
+			</div>
+			<div class="result hidden">
+				<div class="fail-dialog">
+					<h1>Time up!</h1>
+					<br />
+					<p>You have not completed your questionnaires</p>
+				</div>
+				<div class="result-dialog">
+					<h1>Congratulation!</h1>
+				</div>
+			</div>
+		</div>
+		<script type="module" src="script.js"></script>
+	</body>
+</html>
