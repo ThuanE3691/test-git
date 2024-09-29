@@ -1,3 +1,5 @@
+import { QuestionType } from "./Question.js";
+
 function activeElement(element) {
 	element.classList.remove("hidden");
 	element.classList.add("active");
@@ -27,7 +29,7 @@ class ShowQuestionState {
 		this.submitButtonElement =
 			this.questionContainer.querySelector(SUBMIT_BUTTON_CLASS);
 
-		this.questionContainer.addEventListener("click", this.handleClick);
+		this.submitButtonElement.addEventListener("click", this.handleClick);
 	}
 
 	initRenderHtml() {
@@ -58,9 +60,9 @@ class ShowQuestionState {
 	renderQuestionAndChoices() {
 		this.questionElement.textContent = this.question.question;
 		const renderMethods = {
-			"multiple choice": this.renderMultipleChoice,
-			checkbox: this.renderCheckbox,
-			"text response": this.renderTextResponse,
+			[QuestionType.MULTIPLE_CHOICE]: this.renderMultipleChoice,
+			[QuestionType.TEXT_RESPONSE]: this.renderTextResponse,
+			[QuestionType.CHECKBOX]: this.renderCheckbox,
 		};
 		renderMethods[this.question.type].call(this);
 	}
@@ -81,16 +83,15 @@ class ShowQuestionState {
 
 	renderCheckbox = () => {
 		activeElement(this.checkboxElement);
-		this.checkboxElement.innerHTML = this.question.options
-			.map(
-				(option, index) => `
+		this.question.options.forEach((option, index) => {
+			const optionContainer = `
         <div class="option-container">
           <input type="checkbox" name="checkbox" id="checkbox${index}" value="${option}" />
           <label for="checkbox${index}">${option}</label>
         </div>
-      `
-			)
-			.join("");
+      `;
+			this.checkboxElement.insertAdjacentHTML("beforeend", optionContainer);
+		});
 	};
 
 	renderTextResponse = () => {
@@ -108,35 +109,56 @@ class ShowQuestionState {
 	};
 
 	handleSubmit = () => {
-		const answerValues = {
-			"multiple choice": this.getSelectedRadioValue,
-			checkbox: this.getSelectedCheckboxValues,
-			"text response": this.getTextInputValue,
+		let answer;
+		const answerMethods = {
+			[QuestionType.MULTIPLE_CHOICE]: this.getSelectedRadioValue,
+			[QuestionType.TEXT_RESPONSE]: this.getTextInputValue,
+			[QuestionType.CHECKBOX]: this.getSelectedCheckboxValues,
 		};
-		const answer = answerValues[this.question.type].call(this);
 
-		if (answer) {
-			this.selectAnswer(answer);
+		const answerFunc = answerMethods[this.question.type];
+
+		if (answerFunc) {
+			answer = answerFunc();
+			if (this.isValidAnswer(answer)) {
+				this.selectAnswer(answer);
+			}
 		}
 	};
 
+	isValidAnswer(answer) {
+		if (
+			this.question.type === QuestionType.MULTIPLE_CHOICE ||
+			this.question.type === QuestionType.TEXT_RESPONSE
+		) {
+			return answer !== null && answer !== undefined && answer !== "";
+		} else if (this.question.type === QuestionType.CHECKBOX) {
+			return Array.isArray(answer) && answer.length > 0;
+		}
+		return false;
+	}
+
 	getSelectedRadioValue = () => {
-		const selectedRadio = this.multiChoiceElement.querySelector(
-			'input[type="radio"]:checked'
+		const selectedRadio = this.multiChoiceElement.querySelectorAll(
+			'input[type="radio"]'
 		);
-		return selectedRadio ? selectedRadio.value : null;
+
+		const checkedRadio = Array.from(selectedRadio).find((r) => r.checked);
+
+		return checkedRadio
+			? parseInt(checkedRadio.id.replace("option", ""))
+			: null;
 	};
 
 	getSelectedCheckboxValues = () => {
 		return Array.from(
-			this.checkboxElement.querySelectorAll('input[type="checkbox"]:checked')
-		).map((checkbox) => checkbox.value);
+			document.querySelectorAll('input[type="checkbox"]:checked')
+		).map((checkbox) => parseInt(checkbox.id.replace("checkbox", "")));
 	};
 
 	getTextInputValue = () => {
-		const inputElement =
-			this.textResponseElement.querySelector('input[type="text"]');
-		return inputElement.value.trim();
+		const inputElement = document.querySelector('input[type="text"]');
+		return inputElement ? inputElement.value.trim() : "";
 	};
 
 	run() {
@@ -147,7 +169,11 @@ class ShowQuestionState {
 
 	selectAnswer(answers) {
 		this.control.setState(
-			new AnswerQuestionState(this.control, this.question, answers)
+			new AnswerQuestionState(
+				this.control,
+				this.control.getCurrentQuestion(),
+				answers
+			)
 		);
 	}
 }
@@ -162,7 +188,7 @@ class AnswerQuestionState {
 	run() {
 		// Check answer is true or not
 		const isCorrect = this.question.checkAnswer(this.userChoice);
-		const score = this.question.getScore(isCorrect, this.control.timeRemaining);
+		const score = this.question.getScore(isCorrect);
 
 		this.control.updateScore(score);
 

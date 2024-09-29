@@ -26,6 +26,7 @@ class ControlManagement {
 
 	setState(state) {
 		if (this.isFinishControl) return;
+		this.currentState = null;
 		this.currentState = state;
 		this.run();
 	}
@@ -50,10 +51,16 @@ class ControlManagement {
 		);
 	}
 
+	getCurrentQuestion() {
+		return this.questions[this.currentQuestionIndex];
+	}
+
 	nextQuestion() {
+		debugger;
 		if (this.currentQuestionIndex < this.questions.length - 1) {
 			this.currentQuestionIndex++;
-			this.setState(this.getCurrentQuestionState());
+			const nextState = this.getCurrentQuestionState();
+			this.setState(nextState);
 		} else {
 			// Mean that user has answered all question in legal time
 			this.isCompleteAll = true;

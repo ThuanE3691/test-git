@@ -1,6 +1,6 @@
 import { questionData } from "./data.js";
+import { QuestionType, Question } from "./Question.js";
 import ControlManagement from "./ControlManagement.js";
-import Question from "./Question.js";
 
 const controlManagement = new ControlManagement(45);
 
@@ -12,7 +12,7 @@ const randomQuestions = questionData
 randomQuestions.forEach((questionItem) => {
 	let question;
 	switch (questionItem.type) {
-		case "multiple choice":
+		case QuestionType.MULTIPLE_CHOICE:
 			question = new Question(
 				questionItem.question,
 				questionItem.options,
@@ -21,7 +21,7 @@ randomQuestions.forEach((questionItem) => {
 				questionItem.type
 			);
 			break;
-		case "text response":
+		case QuestionType.TEXT_RESPONSE:
 			question = new Question(
 				questionItem.question,
 				[],
@@ -30,7 +30,7 @@ randomQuestions.forEach((questionItem) => {
 				questionItem.type
 			);
 			break;
-		case "checkbox":
+		case QuestionType.CHECKBOX:
 			question = new Question(
 				questionItem.question,
 				questionItem.options,
