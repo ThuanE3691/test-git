@@ -90,13 +90,23 @@ body {
 .tick {
 	border-radius: 50%;
 }
-.multi {
+.multi.active {
 	display: flex;
 }
-.check {
+
+.multi.hidden {
+	display: hidden;
+}
+
+.check.hidden {
 	display: none;
 }
-.answer.text {
+
+.check.active {
+	display: block;
+}
+
+.answer.text.hidden {
 	display: none;
 }
 
@@ -109,6 +119,14 @@ body {
 	height: 20px;
 	display: block; /* Ensure the input is visible */
 	margin-bottom: 10px;
+}
+
+.submit.button.hidden {
+	display: hidden;
+}
+
+.submit.button.active {
+	display: block;
 }
 
 .result {

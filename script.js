@@ -2,9 +2,14 @@ import { questionData } from "./data.js";
 import ControlManagement from "./ControlManagement.js";
 import Question from "./Question.js";
 
-const controlManagement = new ControlManagement(20);
+const controlManagement = new ControlManagement(45);
 
-questionData.forEach((questionItem) => {
+// Get random 10 questions
+const randomQuestions = questionData
+	.sort(() => 0.5 - Math.random())
+	.slice(0, 10);
+
+randomQuestions.forEach((questionItem) => {
 	let question;
 	switch (questionItem.type) {
 		case "multiple choice":

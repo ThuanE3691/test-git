@@ -1,126 +1,143 @@
+function activeElement(element) {
+	element.classList.remove("hidden");
+	element.classList.add("active");
+}
+
+const ANSWER_MULTI_CLASS = ".answer.multi";
+const ANSWER_CHECK_CLASS = ".answer.check";
+const ANSWER_TEXT_CLASS = ".answer.text";
+const SUBMIT_BUTTON_CLASS = ".submit.button";
+const QUESTION_CLASS = ".question";
+const QUESTIONNAIRES_CLASS = ".questionnaires";
+
 class ShowQuestionState {
-	constructor(flow, question) {
-		this.flow = flow;
+	constructor(control, question) {
+		this.control = control;
 		this.question = question;
 
-		this.questionContainer = document.querySelector(".questionnaires");
-		this.questionElement = this.questionContainer.querySelector(".question");
+		this.questionContainer = document.querySelector(QUESTIONNAIRES_CLASS);
+		this.questionElement = this.questionContainer.querySelector(QUESTION_CLASS);
 
 		this.multiChoiceElement =
-			this.questionContainer.querySelector(".answer.multi");
+			this.questionContainer.querySelector(ANSWER_MULTI_CLASS);
 		this.checkboxElement =
-			this.questionContainer.querySelector(".answer.check");
+			this.questionContainer.querySelector(ANSWER_CHECK_CLASS);
 		this.textResponseElement =
-			this.questionContainer.querySelector(".answer.text");
+			this.questionContainer.querySelector(ANSWER_TEXT_CLASS);
+		this.submitButtonElement =
+			this.questionContainer.querySelector(SUBMIT_BUTTON_CLASS);
+
+		this.questionContainer.addEventListener("click", this.handleClick);
 	}
 
 	initRenderHtml() {
 		this.questionContainer.style.display = "block";
-		this.multiChoiceElement.style.display = "none";
-		this.checkboxElement.style.display = "none";
-		this.textResponseElement.style.display = "none";
+		activeElement(this.submitButtonElement);
+		const answerElements = [
+			this.multiChoiceElement,
+			this.checkboxElement,
+			this.textResponseElement,
+		];
+		answerElements.forEach((element) => {
+			element.classList.remove("active");
+			element.classList.add("hidden");
+		});
+		this.clearAnswerElements();
+	}
+
+	clearAnswerElements() {
+		this.multiChoiceElement.innerHTML = "";
+		this.checkboxElement.innerHTML = "";
+		const textInput =
+			this.textResponseElement.querySelector('input[type="text"]');
+		if (textInput) {
+			textInput.value = "";
+		}
 	}
 
 	renderQuestionAndChoices() {
 		this.questionElement.textContent = this.question.question;
-		switch (this.question.type) {
-			case "multiple choice":
-				this.renderMultipleChoice();
-				break;
-			case "checkbox":
-				this.renderCheckbox();
-				break;
-			case "text response":
-				this.renderTextResponse();
-				break;
-		}
+		const renderMethods = {
+			"multiple choice": this.renderMultipleChoice,
+			checkbox: this.renderCheckbox,
+			"text response": this.renderTextResponse,
+		};
+		renderMethods[this.question.type].call(this);
 	}
 
-	renderMultipleChoice() {
-		this.multiChoiceElement.style.display = "block";
-		this.multiChoiceElement.innerHTML = "";
-		// Container
+	renderMultipleChoice = () => {
+		activeElement(this.multiChoiceElement);
+		this.multiChoiceElement.innerHTML = this.question.options
+			.map(
+				(option, index) => `
+					<div class="option-container">
+						<input type="radio" name="multi-choice" id="option${index}" value="${option}" />
+						<label for="option${index}">${option}</label>
+					</div>
+      		`
+			)
+			.join("");
+	};
 
-		// Div <options></options>
+	renderCheckbox = () => {
+		activeElement(this.checkboxElement);
+		this.checkboxElement.innerHTML = this.question.options
+			.map(
+				(option, index) => `
+        <div class="option-container">
+          <input type="checkbox" name="checkbox" id="checkbox${index}" value="${option}" />
+          <label for="checkbox${index}">${option}</label>
+        </div>
+      `
+			)
+			.join("");
+	};
 
-		this.question.options.forEach((option, index) => {
-			const optionHtml = `
-                <div class="option-container">
-                    <input type="radio" name="multi-choice" id="option${index}" value="${option}" />
-                    <label for="option${index}">${option}</label>
-                </div>
-            `;
-			this.multiChoiceElement.insertAdjacentHTML("beforeend", optionHtml);
-		});
-
-		this.multiChoiceElement.addEventListener("change", (e) => {
-			if (e.target.type === "radio") {
-				this.selectAnswer(e.target.value);
-			}
-		});
-	}
-
-	renderCheckbox() {
-		this.checkboxElement.style.display = "block";
-		this.checkboxElement.innerHTML = "";
-
-		this.question.options.forEach((option, index) => {
-			const optionHtml = `
-                <div class="option-container">
-                    <input type="checkbox" name="checkbox" id="checkbox${index}" value="${option}" />
-                    <label for="checkbox${index}">${option}</label>
-                </div>
-            `;
-			this.checkboxElement.insertAdjacentHTML("beforeend", optionHtml);
-		});
-
-		const submitButton = document.createElement("button");
-		submitButton.textContent = "Submit";
-		submitButton.addEventListener("click", () => {
-			const selectedOptions = Array.from(
-				this.checkboxElement.querySelectorAll('input[type="checkbox"]:checked')
-			).map((checkbox) => checkbox.value);
-			this.selectAnswer(selectedOptions);
-		});
-		this.checkboxElement.appendChild(submitButton);
-	}
-
-	renderTextResponse() {
-		this.textResponseElement.style.display = "block";
-		this.textResponseElement.classList.add("active");
+	renderTextResponse = () => {
+		activeElement(this.textResponseElement);
 		const inputElement =
 			this.textResponseElement.querySelector('input[type="text"]');
 		inputElement.value = "";
-
-		// Focus on the input element to make it active
 		inputElement.focus();
+	};
 
-		// Add a submit button
-		const submitButton = document.createElement("button");
-		submitButton.textContent = "Submit";
-		this.textResponseElement.appendChild(submitButton);
+	handleClick = (event) => {
+		if (event.target === this.submitButtonElement) {
+			this.handleSubmit();
+		}
+	};
 
-		// Function to handle answer submission
-		const submitAnswer = () => {
-			const answer = inputElement.value.trim();
-			if (answer) {
-				this.selectAnswer(answer);
-			}
+	handleSubmit = () => {
+		const answerValues = {
+			"multiple choice": this.getSelectedRadioValue,
+			checkbox: this.getSelectedCheckboxValues,
+			"text response": this.getTextInputValue,
 		};
+		const answer = answerValues[this.question.type].call(this);
 
-		// Event listener for the Enter key
-		inputElement.addEventListener("keypress", (e) => {
-			if (e.key === "Enter") {
-				submitAnswer();
-			}
-		});
+		if (answer) {
+			this.selectAnswer(answer);
+		}
+	};
 
-		// Event listener for the submit button
-		submitButton.addEventListener("click", submitAnswer);
+	getSelectedRadioValue = () => {
+		const selectedRadio = this.multiChoiceElement.querySelector(
+			'input[type="radio"]:checked'
+		);
+		return selectedRadio ? selectedRadio.value : null;
+	};
 
-		// Log the input element to check if it exists
-		console.log("Text input element:", inputElement);
-	}
+	getSelectedCheckboxValues = () => {
+		return Array.from(
+			this.checkboxElement.querySelectorAll('input[type="checkbox"]:checked')
+		).map((checkbox) => checkbox.value);
+	};
+
+	getTextInputValue = () => {
+		const inputElement =
+			this.textResponseElement.querySelector('input[type="text"]');
+		return inputElement.value.trim();
+	};
 
 	run() {
 		// If don't have render Question before, Init Render state
@@ -129,56 +146,65 @@ class ShowQuestionState {
 	}
 
 	selectAnswer(answers) {
-		this.flow.setState(
-			new AnswerQuestionState(this.flow, this.question, answers)
+		this.control.setState(
+			new AnswerQuestionState(this.control, this.question, answers)
 		);
 	}
 }
 
 class AnswerQuestionState {
-	constructor(flow, question, userChoice) {
-		this.flow = flow;
+	constructor(control, question, userChoice) {
+		this.control = control;
 		this.question = question;
 		this.userChoice = userChoice;
 	}
 
 	run() {
 		// Check answer is true or not
-		console.log("Answer State for Question: ", this.question.question);
 		const isCorrect = this.question.checkAnswer(this.userChoice);
-		const score = this.question.getScore(isCorrect, this.flow.timeRemaining);
+		const score = this.question.getScore(isCorrect, this.control.timeRemaining);
 
-		this.flow.updateScore(score);
+		this.control.updateScore(score);
 
 		// After check will run
-		this.flow.nextQuestion();
+		this.control.nextQuestion();
 	}
 }
 
 class EndControlState {
-	constructor(flow) {
-		this.flow = flow;
+	constructor(control) {
+		this.control = control;
+		this.resultContainer = document.querySelector(".result");
+		this.failDialog = this.resultContainer.querySelector(".fail-dialog");
+		this.resultDialog = this.resultContainer.querySelector(".result-dialog");
+		this.questionnaireContainer = document.querySelector(".questionnaires");
 	}
 
 	renderFailDialog() {
-		console.log("Time's up! You didn't complete all questions.");
+		this.failDialog.style.display = "block";
+		this.resultDialog.style.display = "none";
 	}
 
 	renderShowTotalScore() {
-		// Use this.flow.totalScore
-		console.log(`Total score: ${this.flow.totalScore}`);
+		const scoreElement = document.createElement("p");
+		scoreElement.textContent = `Your total score: ${this.control.totalScore}`;
+		this.resultDialog.appendChild(scoreElement);
+		this.resultDialog.style.display = "block";
+		this.failDialog.style.display = "none";
 	}
 
 	run() {
-		// Remove all HTML Render
+		this.questionnaireContainer.style.display = "none";
+		this.resultContainer.classList.remove("hidden");
 
 		// Check condition to render Fail Dialog
-		if (!this.flow.isCompleteAll) {
+		if (!this.control.isCompleteAll) {
 			this.renderFailDialog();
+		} else {
+			this.renderShowTotalScore();
 		}
-		this.renderShowTotalScore();
 
-		this.flow.isFinishFlow = true;
+		this.control.isFinishControl = true;
 	}
 }
 

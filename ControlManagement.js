@@ -2,21 +2,18 @@ import Timer from "./timer.js";
 import { ShowQuestionState, EndControlState } from "./ControlState.js";
 
 class ControlManagement {
-	timeRemaining;
 	totalScore = 0;
 	currentState = null;
 	currentQuestionIndex = 0;
 	questions = [];
-	timeInterval = null;
+	timer = null;
 	isCompleteAll = false;
-	isFinishFlow = false;
+	isFinishControl = false;
 
 	constructor(time) {
-		this.timeRemaining = time;
-
-		this.timeInterval = new Timer(
+		this.timer = new Timer(
 			document.querySelector(".timer"),
-			this.timeRemaining,
+			time,
 			this.start.bind(this),
 			this.stop.bind(this)
 		);
@@ -28,10 +25,7 @@ class ControlManagement {
 	}
 
 	setState(state) {
-		if (this.isFinishFlow) {
-			return;
-		}
-
+		if (this.isFinishControl) return;
 		this.currentState = state;
 		this.run();
 	}
@@ -45,10 +39,7 @@ class ControlManagement {
 	}
 
 	stop() {
-		if (this.timeInterval) {
-			clearInterval(this.timeInterval);
-			this.timeInterval = null;
-		}
+		this.timer.forceStop();
 		this.setState(new EndControlState(this));
 	}
 

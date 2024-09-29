@@ -30,7 +30,6 @@ class Question {
 	checkAnswer(userAnswer) {
 		switch (this.type) {
 			case "multiple choice":
-			case "text response":
 				return userAnswer === this.correctAnswer;
 			case "checkbox":
 				return (

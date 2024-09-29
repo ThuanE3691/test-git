@@ -1,77 +1,90 @@
-function Timer(root, time = 120, startFlow, stopFlow) {
-	root.innerHTML = getHTML();
+class Timer {
+	constructor(root, time = 120, onStart, onStop) {
+		this.root = root;
+		this.time = time;
+		this.onStart = onStart;
+		this.onStop = onStop;
+		this.interval = null;
+		this.remainingSeconds = time;
 
-	const el = {
-		minutes: root.querySelector(".timer__part--minutes"),
-		seconds: root.querySelector(".timer__part--seconds"),
-		control: root.querySelector(".timer__btn--control"),
-	};
-
-	let interval = null;
-	let remainingSeconds = time;
-
-	el.control.addEventListener("click", () => {
-		if (interval === null) {
-			startFlow();
-			start();
-		}
-	});
-	updateInterfaceTime();
-
-	function updateInterfaceTime() {
-		const minutes = Math.floor(remainingSeconds / 60);
-		const seconds = remainingSeconds % 60;
-
-		el.minutes.textContent = minutes.toString().padStart(2, "0");
-		el.seconds.textContent = seconds.toString().padStart(2, "0");
+		this.initializeUI();
+		this.updateInterfaceTime();
+		this.addEventListeners();
 	}
 
-	function updateInterfaceControls() {
-		if (interval === null) {
-			el.control.innerHTML = `<div class="material-icons">play_arrow</div>`;
-			el.control.classList.add("timer__btn--start");
-			el.control.classList.remove("timer__btn--stop");
-		} else {
-			el.control.innerHTML = `<div class="material-icons">pause</div>`;
-			el.control.classList.add("timer__btn--stop");
-			el.control.classList.remove("timer__btn--start");
-		}
+	initializeUI() {
+		this.root.innerHTML = this.createHTML();
+		this.el = {
+			minutes: this.root.querySelector(".timer__part--minutes"),
+			seconds: this.root.querySelector(".timer__part--seconds"),
+			control: this.root.querySelector(".timer__btn--control"),
+		};
 	}
 
-	function start() {
-		if (remainingSeconds === 0) return;
-
-		interval = setInterval(() => {
-			remainingSeconds--;
-			updateInterfaceTime();
-
-			if (remainingSeconds === 0) {
-				stop();
-			}
-		}, 1000);
-
-		updateInterfaceControls();
-	}
-
-	function stop() {
-		clearInterval(interval);
-		interval = null;
-		stopFlow();
-		updateInterfaceControls();
-	}
-
-	return interval;
-}
-
-function getHTML() {
-	return `
+	createHTML() {
+		return `
       <div class="timer__part timer__part--minutes">00</div>
       <div class="timer__part">:</div>
       <div class="timer__part timer__part--seconds">00</div>
       <button type="button" class="timer__btn timer__btn--control timer__btn--start">
-          <div class="material-icons">play_arrow</div>
+        <span class="material-icons">play_arrow</span>
       </button>
-  `;
+    `;
+	}
+
+	addEventListeners() {
+		this.el.control.addEventListener("click", () => {
+			if (this.interval === null) {
+				this.start();
+			} else {
+				this.stop();
+			}
+		});
+	}
+
+	updateInterfaceTime() {
+		const minutes = Math.floor(this.remainingSeconds / 60);
+		const seconds = this.remainingSeconds % 60;
+		this.el.minutes.textContent = minutes.toString().padStart(2, "0");
+		this.el.seconds.textContent = seconds.toString().padStart(2, "0");
+	}
+
+	updateInterfaceControls() {
+		const isRunning = this.interval !== null;
+		this.el.control.innerHTML = `<span class="material-icons">${
+			isRunning ? "pause" : "play_arrow"
+		}</span>`;
+		this.el.control.classList.toggle("timer__btn--stop", isRunning);
+		this.el.control.classList.toggle("timer__btn--start", !isRunning);
+	}
+
+	start() {
+		if (this.remainingSeconds === 0) return;
+		this.interval = setInterval(() => this.tick(), 1000);
+		this.updateInterfaceControls();
+		this.onStart();
+	}
+
+	tick() {
+		this.remainingSeconds--;
+		this.updateInterfaceTime();
+		if (this.remainingSeconds === 0) {
+			this.stop();
+		}
+	}
+
+	stop() {
+		clearInterval(this.interval);
+		this.interval = null;
+		this.updateInterfaceControls();
+		this.onStop();
+	}
+
+	forceStop() {
+		if (this.interval !== null) {
+			this.stop();
+		}
+	}
 }
 
 export default Timer;
